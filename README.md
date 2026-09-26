@@ -57,6 +57,7 @@
 | 我的 Brier | 0.447 |
 | 照旧基线 Brier | 0.000 |
 | 气候基线 Brier | 0.101 |
+| 决策账本 | 每次触发一行；**门拒绝这次预测原本不落行** → 弃权率结构性漏掉一整类弃权。已修（[findings/03](findings/03-drills-and-fires-share-one-channel.md)） |
 | 采集腿最长断流 | **55 小时**（2026-09-24T02:33 → 2026-09-26T20:36），两天没人发现 |
 
 → 详细页 [`worlds/spacemolt.md`](worlds/spacemolt.md) ｜ 自动生成的总账 [`SETTLEMENTS.md`](SETTLEMENTS.md)
