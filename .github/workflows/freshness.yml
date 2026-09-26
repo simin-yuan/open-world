@@ -25,7 +25,7 @@ jobs:
           python-version: "3.11"
       - name: 证明这条闸能说不
         run: python verify/selftest.py
-      - name: check the three legs
+      - name: check the four legs
         run: python verify/check.py
       - name: summary
         if: always()
