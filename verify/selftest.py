@@ -90,11 +90,19 @@ def main():
             for r in rows:
                 f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
+    def m_rule(d):
+        # 公开的规则被改过：导出记录里的 sha 对不上了（本地偷偷放宽视界）
+        p = os.path.join(d, "data", "question_rule.json")
+        r = json.load(open(p, encoding="utf-8"))
+        r["horizons_hours"] = [3.0, 6.0]
+        json.dump(r, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+
     case("A 导出腿停摆 48h", m_export, "[导出腿]")
     case("B 采集腿断流 9h", m_read, "[采集腿]")
     case("C 结算腿丢一条结算", m_settle, "[结算腿]")
-    case("D 决策腿 30h 无新行", m_decision, "[决策腿]")
+    case("D 决策腿假死 30h", m_decision, "[决策腿]")
     case("E EXPORT_STATE 条数撒谎", m_counts, "[自洽]")
+    case("F 公开规则被偷偷改过", m_rule, "[规则]")
 
     bad = 0
     with tempfile.TemporaryDirectory(prefix="ow-selftest-") as tmp:

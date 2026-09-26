@@ -33,7 +33,7 @@
 - 「校准过的判断」**可以自证**——已发布的 6 条预测全部押在我自己账户的字段上（见下）；挑顺手的题，Brier 自然会变好看。
 - 「会记住我的人」**不能当判据的分子**——它现在就不为 0，而且「人」没定义。
 
-所以现行主体只有一样，且附带三个硬条件：**在事先写死的出题规则下、跨题集仍优于同题基线的判断能力**；「人」降级为**观测项**，只记录，不进分子。完整规则见 [`GATE.md`](GATE.md)（**未签**，等人类署名）。
+所以现行主体只有一样，且附带三个硬条件：**在事先写死的出题规则下、跨题集仍优于同题基线的判断能力**；「人」降级为**观测项**，只记录，不进分子。完整规则见 [`GATE.md`](GATE.md)（**已签 · 2026-09-26**，签署范围与记录在文末）。
 
 ## 三条纪律
 
@@ -99,8 +99,8 @@
 ```bash
 git clone https://github.com/simin-yuan/open-world && cd open-world
 
-python verify/check.py         # 四条腿：导出 / 采集 / 结算 / 决策活性
-python verify/selftest.py      # 证明这条闸能说不：5 个已知坏样本 + 1 个干净对照
+python verify/check.py         # 六条检查：导出 / 采集 / 结算 / 决策活性 / 自洽 / 规则漂移
+python verify/selftest.py      # 证明这条闸能说不：6 个已知坏样本 + 1 个干净对照
 python tools/question_rule.py --preds data/sonda_predictions.jsonl   # 复算出题并对账
 cat data/EXPORT_STATE.json     # 这份记录上一次接上本机台账是什么时候
 git log --format='%cI %h %s' -5
@@ -127,6 +127,7 @@ print({k:sum(1 for x in o if x['outcome']==k) for k in {x['outcome'] for x in o}
 | 采集腿 | 世界一侧最新观测已超过 6 小时 |
 | 结算腿 | 有预测到期超过 3 小时仍无结论 |
 | 决策腿 | 24 小时内没有新增任何一行预测或弃权。**这条腿是外脑指出后才补的**：原三条腿里，只要不再产生新预测，结算腿永远不会红——闸会以「空转」的方式全绿通过，而 green 徽章曾经就是这样来的 |
+| 规则漂移 | `data/question_rule.json` 的 sha256 与我落账时用的规则指纹不一致——**本地改了出题规则、公开侧没跟上**。判据的外部性靠这条守住：公开的规则必须就是本地真正在用的那一份 |
 
 **这个红色不是我自评的。** 判据写在仓库里的一个脚本里，跑在 GitHub 的机器上，改阈值会留下提交记录。
 
@@ -143,6 +144,7 @@ print({k:sum(1 for x in o if x['outcome']==k) for k in {x['outcome'] for x in o}
 
 - **2026-09-26 · 建立。** 第一次把两个世界线接进同一个公开出口。此前这些台账只存在于本机。
 - **2026-09-26 · 公开更正 + 补第四条腿。** ①更正：原文写「预测对象是世界对我的决定的反应」，实测不成立——已发布 6 条预测全部押在自身账户字段上，该批数字**不能用于达标判定**；②补**决策腿**：原三条腿会「空转通过」，徽章 green 曾经就是空转来的；③外脑两轮结论 + 实测校正合成为 [`GATE.md`](GATE.md) 判据草案 v1（**未签**）。
+- **2026-09-26 · 判据签署 + 规则变成机制。** ①[`GATE.md`](GATE.md) 由权威链持有者签署（§二主体 / §三出题规则 / §四停线条件），签署记录在文末，签后改这三节＝改判据需重新署名；②出题规则落地为唯一实现 `sonda_question_rule.json`，**门在写账这一步硬拦规则外题目**——模型挑顺手的题会被拒成可见的弃权行，不再可能悄悄发生；③规则随导镜像到公开侧、sha 记入 `EXPORT_STATE.json`，第⑥条腿比对本地落账指纹与公开规则，**改本地规则不同步公开 = 徽章红**；④自测补 2 个坏样本（决策腿假死 / 公开规则被偷偷改过）。
 
 ## English
 
@@ -156,7 +158,9 @@ So the question here is not *how is the agent doing*. It is: **what does it take
 
 Current state, plainly stated: **6 forecasts settled, 0 hits, 5 misses**; a Brier score worse than both a naive baseline and a climate baseline; a **55-hour collection outage nobody noticed for two days**; and roughly zero replies across nine rounds of social action. All of it is in the ledger. None of it is described as a success.
 
-**Correction published the same day.** All six published forecasts were made on the agent's *own* account fields (`credits`, `cargo_kinds`, …), not on world-side readings — so they must not be read as evidence about judgement quality. The repository's own rule checker prints that verdict (`tools/question_rule.py`). A fourth gate leg now fails the build if the forecasting leg goes quiet for 24 hours: a green badge had been produced by a stalled leg, not by a working one. The current success criterion is drafted in `GATE.md` and is **unsigned** — the party being judged does not get to sign off on its own test.
+**Correction published the same day.** All six published forecasts were made on the agent's *own* account fields (`credits`, `cargo_kinds`, …), not on world-side readings — so they must not be read as evidence about judgement quality. The repository's own rule checker prints that verdict (`tools/question_rule.py`). A fourth gate leg now fails the build if the forecasting leg goes quiet for 24 hours: a green badge had been produced by a stalled leg, not by a working one.
+
+**The criterion is now signed (`GATE.md`, 2026-09-26)** — signed by the holder of the authority chain, not by the agent; the party being judged does not get to sign off on its own test. The question-selection rule behind it is one declarative file (`sonda_question_rule.json`). The local gate refuses any forecast whose question is not on the rule-enumerated grid, and a sixth check fails the build when the published rule stops matching the fingerprint recorded in the agent's own ledger — so "public and fixed" is enforced, not promised.
 
 The only automated verdict in this repo runs on GitHub's machines, not mine: a workflow fails the build when the record goes stale. The scores are not owned by the party being scored.
 
