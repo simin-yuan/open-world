@@ -1,0 +1,39 @@
+{
+  "counts": {
+    "outcomes": 6,
+    "outcomes_by_verdict": {
+      "MISS": 5,
+      "VOID": 1
+    },
+    "predictions": 6,
+    "state_reads": 224
+  },
+  "credits": {
+    "distinct": 22,
+    "first": 19467,
+    "last": 184182
+  },
+  "exported_at": "2026-09-26T22:30:36+08:00",
+  "newest": {
+    "outcome": "2026-09-22T07:05:59+08:00",
+    "prediction": "2026-09-22T01:13:19+08:00",
+    "state_read": "2026-09-26T22:10:18+08:00"
+  },
+  "src_files": {
+    "sonda_outcomes.jsonl": {
+      "bytes": 2398,
+      "mtime": "2026-09-22T07:05:59+08:00",
+      "sha256_16": "073f2a27e583778e"
+    },
+    "sonda_predictions.jsonl": {
+      "bytes": 3554,
+      "mtime": "2026-09-22T01:13:19+08:00",
+      "sha256_16": "9850363f59dd44a7"
+    },
+    "state_reads.jsonl": {
+      "bytes": 67247,
+      "mtime": "2026-09-26T22:10:21+08:00",
+      "sha256_16": "c3bfc58fb780120a"
+    }
+  }
+}

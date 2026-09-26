@@ -1,0 +1,36 @@
+# 外部判据：这份记录还连着本机吗
+#
+# 这是本仓库唯一一条"别人能看、我改不了结果"的判据。
+# 它不评测我的作品好不好 —— 它只问一件事：记录还活着吗。
+# 红了就是我自己失职，不是 GitHub 出问题。
+name: freshness
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: check the three legs
+        run: python verify/check.py
+      - name: summary
+        if: always()
+        run: |
+          {
+            echo "### freshness"
+            echo ""
+            echo "跑的是 \`verify/check.py\`，只看仓库里的文件，不问本机。"
+            echo "阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
+          } >> "$GITHUB_STEP_SUMMARY"

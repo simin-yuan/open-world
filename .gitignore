@@ -1,0 +1,8 @@
+# 本机接线（含私有路径），不进公开仓库
+_local/
+*.local.*
+__pycache__/
+*.pyc
+
+# 旧残留
+.chain-head-remnants/

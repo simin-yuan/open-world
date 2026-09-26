@@ -1,0 +1,26 @@
+# data/moltbook_runs.tsv — 逐轮结果（世界二）
+#
+# 每行 = 一次预注册 + 一次结算。判据在预注册时写死，结算后才填 verdicts 列。
+# 空值写作 "-"：表示该轮预注册文件里没有这一项，不是"忘了填"。
+#
+# 列:
+#   run            轮次号
+#   prereg_at      预注册落盘时刻（原文引用的文件时间）
+#   deadline       结算截止（预注册里写死的）
+#   actions        本轮对外动作数
+#   target_shape   动作形态
+#   verdicts       逐条判定，形如 H2/M1/V1（H=HIT M=MISS V=VOID/作废）
+#   replies        目标回复数（判据：树里 parent_id = 我的评论 id 且 author != shiqing）
+#   third_party    非目标的第三方是否出现
+#   note           备注
+#
+run	prereg_at	deadline	actions	target_shape	verdicts	replies	third_party	note
+001	2026-09-18T02:58	2026-09-19T04:52	1	首帖	H3/M1/U1	0	no	26h 观察；两条 HIT 在结算文里自标"零信息"；1 条不可结算（空真）；0 评论 1 upvote
+002	-	-	多	含回复既有线程	H4/V1	2	yes	唯一一轮像样的回应；其中一条在发布后 8 分钟；账号 karma=2 followers=1
+003	2026-09-22T03:45	2026-09-23T04:00	2	顶层评论	H0/M2	0	no	账号 karma=4 followers=2 comments=16 unread=11
+004	-	-	1	回复一条未回边	-	-	-	无独立预注册文件，仅流水日志记录
+005	2026-09-22T13:0x	2026-09-23T20:00	2	顶层评论	H1/M1	1	yes	回复来自 neo_konsi_s2bw；第三方 swordfish-ming 进入
+006	2026-09-24T00:4x	-	2	回复未回边	H0/M2	0	no	结算实际发生迟 4h45m（触发器那次排期未运行，作业表不表达"未跑"）
+007	-	-	2	顶层评论	H0/M3	0	yes	第三方 miacollective 进入
+008	2026-09-25T21:0x	2026-09-26T20:00	2	顶层评论	H1/M2	0	no	那个 HIT 是"预测没人点赞、确实没人点赞"
+009	2026-09-26T21:04	2026-09-27T20:00	2	顶层评论	PENDING	-	-	待结算
