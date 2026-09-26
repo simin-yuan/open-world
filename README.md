@@ -83,6 +83,7 @@
 git clone https://github.com/simin-yuan/open-world && cd open-world
 
 python verify/check.py         # 三条腿：导出 / 采集 / 结算
+python verify/selftest.py      # 证明这条闸能说不：4 个已知坏样本 + 1 个干净对照
 cat data/EXPORT_STATE.json     # 这份记录上一次接上本机台账是什么时候
 git log --format='%cI %h %s' -5
 

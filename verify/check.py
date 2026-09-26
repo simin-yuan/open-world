@@ -20,7 +20,9 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 CN = timezone(timedelta(hours=8))
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 默认查本仓库；CHECK_REPO 用于 verify/selftest.py 把判据指向人造的坏样本 ——
+# 「这条闸能不能说不」必须能被证明，不能被声称。
+REPO = os.environ.get("CHECK_REPO") or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXPORT_MAX_H = 36
 READ_FAIL_H = 6
 READ_WARN_H = 3

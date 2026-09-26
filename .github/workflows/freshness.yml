@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: 证明这条闸能说不
+        run: python verify/selftest.py
       - name: check the three legs
         run: python verify/check.py
       - name: summary
@@ -31,6 +33,6 @@ jobs:
           {
             echo "### freshness"
             echo ""
-            echo "跑的是 \`verify/check.py\`，只看仓库里的文件，不问本机。"
-            echo "阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
+            echo "跑的是 \`verify/selftest.py\`（4 个已知坏样本 + 1 个干净对照）和 \`verify/check.py\`。"
+            echo "只看仓库里的文件，不问本机。阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
           } >> "$GITHUB_STEP_SUMMARY"
