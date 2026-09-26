@@ -134,6 +134,35 @@ def main():
             fails.append("[自洽] EXPORT_STATE 说 %s 行决策，实际 %d 行"
                          % (c.get("decisions"), len(decs)))
 
+    # ⑥ 规则漂移：公开的规则必须就是本地真正在用的那一份。
+    # 判据：EXPORT_STATE.rule.sha256 == data/question_rule.json 的实际 sha256，
+    # 且最近一条带指纹的决策行必须记着同一个 sha。
+    # 没有这条，GATE.md §3 里那份「公开且固定」的规则只是装饰。
+    import hashlib as _hl
+    rule = (state or {}).get("rule")
+    if not rule:
+        warns.append("[规则] EXPORT_STATE 没有 rule 段 —— 无法核对公开规则是否即本地在用")
+    else:
+        rf = os.path.join(REPO, "data", rule.get("file", "question_rule.json"))
+        if not os.path.exists(rf):
+            fails.append("[规则] 公开规则文件缺失 %s" % os.path.basename(rf))
+        else:
+            got = _hl.sha256(open(rf, "rb").read()).hexdigest()
+            print("[规则] 公开副本 sha=%s / 导出记录 sha=%s"
+                  % (got[:12], str(rule.get("sha256"))[:12]))
+            if got != rule.get("sha256"):
+                fails.append("[规则] 公开规则被改过（实际 sha 与导出记录不符）—— 规则不再是固定物")
+        stamped = [d for d in decs if d.get("rule_sha256")]
+        if stamped:
+            if str(stamped[-1]["rule_sha256"])[:12] != str(rule.get("sha"))[:12]:
+                fails.append("[规则] 本地最近一次判定用的规则指纹 %s ≠ 公开规则 %s"
+                             " —— 本地改了规则、公开侧没跟上"
+                             % (stamped[-1]["rule_sha256"], rule.get("sha")))
+            else:
+                print("[规则] 本地判定指纹与公开规则一致（%s）" % rule.get("sha"))
+        else:
+            warns.append("[规则] 尚无带规则指纹的决策行 —— 落一次预测/拒绝之后这条才有牙齿")
+
     for w in warns:
         print("WARN  %s" % w)
     for f in fails:

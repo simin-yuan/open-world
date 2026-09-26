@@ -1,0 +1,13 @@
+{
+  "_note": "GATE.md §3 出题规则（已签 2026-09-26）。改这个文件里的 whitelist/horizons/directions/threshold = 改判据，需重新署名。",
+  "version": 1,
+  "whitelist": ["mkt_silicon_best_buy"],
+  "horizons_hours": [3.0, 6.0, 12.0],
+  "directions": ["gt", "lt"],
+  "threshold": 0.0,
+  "tol_minutes": 15,
+  "self_fields": ["credits", "credits_earned", "credits_spent", "implied_credits",
+                  "cargo_kinds", "poi", "docked_at", "system", "offset", "player_id",
+                  "read_at", "account", "mkt_tick", "mkt_silicon_status",
+                  "mkt_silicon_best_sell"]
+}

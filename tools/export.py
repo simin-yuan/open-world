@@ -95,6 +95,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True, help="本机台账目录（含 sonda_*.jsonl / state_reads.jsonl）")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--rule", default=None,
+                    help="出题规则文件（缺省：<src>/../scripts/sonda_question_rule.json）")
     args = ap.parse_args()
 
     ddir = os.path.join(REPO, "data")
@@ -128,6 +130,22 @@ def main():
             }
         else:
             state["src_files"][name] = {"present": False}
+
+    # 出题规则（GATE.md §3）：随导出镜像到公开侧，并把 sha 记进 EXPORT_STATE。
+    # 没有这一步，公开的那份规则只是装饰——没人能验证「本地真正在用的就是它」。
+    rule_src = args.rule or os.path.join(
+        os.path.dirname(os.path.abspath(args.src.rstrip("\\/"))), "scripts", "sonda_question_rule.json")
+    if not os.path.exists(rule_src):
+        print("EXPORT_FAIL: 出题规则缺失 %s" % rule_src)
+        return 1
+    shutil.copyfile(rule_src, os.path.join(ddir, "question_rule.json"))
+    import hashlib
+    _rsha = hashlib.sha256(open(rule_src, "rb").read()).hexdigest()
+    _r = json.load(open(rule_src, encoding="utf-8"))
+    state["rule"] = {"file": "question_rule.json", "sha256": _rsha, "sha": _rsha[:12],
+                     "version": _r.get("version"), "whitelist": _r.get("whitelist"),
+                     "horizons_hours": _r.get("horizons_hours"), "directions": _r.get("directions"),
+                     "threshold": _r.get("threshold")}
 
     preds = jl(os.path.join(ddir, "sonda_predictions.jsonl"))
     outs = jl(os.path.join(ddir, "sonda_outcomes.jsonl"))
