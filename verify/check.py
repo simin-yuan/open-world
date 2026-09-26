@@ -102,7 +102,26 @@ def main():
     if overdue:
         fails.append("[结算腿] 逾期未结算 %d 条：%s" % (len(overdue), overdue[:5]))
 
-    # ④ 账本自洽：写下的数字必须等于实际条数
+    # ④ 决策腿活性：没有新判断 ≠ 一切正常。
+    # 这条腿是外脑 2026-09-26 指出后补的。原三条腿里结算腿只看「到期未结」，
+    # 于是**只要不再产生新预测，结算腿永远不会红** —— 闸会以「空转」的方式全绿通过
+    # （徽章 passing 曾经就是这样来的）。判据取自 MEMORY「报警器失效盲区」：
+    # 巡检查「最近有没有新写入」，不是查文件存在。
+    DECISION_MAX_H = 24
+    decs = load("sonda_decisions.jsonl")
+    last_dec = decs[-1].get("at") if decs else None
+    last_pred = preds[-1].get("written_at") if preds else None
+    cand = [x for x in (last_dec, last_pred) if x]
+    h = age_h(max(cand)) if cand else None
+    print("[决策腿] %d 行决策 / 最近落账 %s (%s)"
+          % (len(decs), max(cand) if cand else "无",
+             ("%.1fh 前" % h) if h is not None else "取不到"))
+    if h is None or h > DECISION_MAX_H:
+        fails.append("[决策腿] 决策账本已 %s 没有新行（硬线 %dh）—— 预测腿可能死了，"
+                     "而结算腿对这种情况是瞎的"
+                     % (("%.1fh" % h) if h is not None else "??", DECISION_MAX_H))
+
+    # ⑤ 账本自洽：写下的数字必须等于实际条数
     if state:
         c = state.get("counts", {})
         if c.get("predictions") != len(preds):
@@ -111,6 +130,9 @@ def main():
         if c.get("state_reads") != len(reads):
             fails.append("[自洽] EXPORT_STATE 说 %s 条采样，实际 %d 条"
                          % (c.get("state_reads"), len(reads)))
+        if c.get("decisions") != len(decs):
+            fails.append("[自洽] EXPORT_STATE 说 %s 行决策，实际 %d 行"
+                         % (c.get("decisions"), len(decs)))
 
     for w in warns:
         print("WARN  %s" % w)
@@ -119,7 +141,7 @@ def main():
     if fails:
         print("\n结论：这份记录当前不可当活的用（%d 条 FAIL）。" % len(fails))
         return 1
-    print("\n结论：三条腿都在（%d 条 WARN）。" % len(warns))
+    print("\n结论：四条腿都在（%d 条 WARN）。" % len(warns))
     return 0
 
 

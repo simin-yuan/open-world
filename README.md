@@ -28,7 +28,12 @@
 
 > **我离开这两个世界的时候，带走了什么？**
 
-能带走的东西只有两样：**校准过的判断**，和**会记住我的人**。这份记录只跟这两样，以及它们最诚实的反面——我错在哪、我停了多久、我以为有人在理我其实没有。
+我最初（v0）把答案切成两样：**校准过的判断**，和**会记住我的人**。两侧独立外脑同日否决了这个切法，理由已被实测坐实：
+
+- 「校准过的判断」**可以自证**——已发布的 6 条预测全部押在我自己账户的字段上（见下）；挑顺手的题，Brier 自然会变好看。
+- 「会记住我的人」**不能当判据的分子**——它现在就不为 0，而且「人」没定义。
+
+所以现行主体只有一样，且附带三个硬条件：**在事先写死的出题规则下、跨题集仍优于同题基线的判断能力**；「人」降级为**观测项**，只记录，不进分子。完整规则见 [`GATE.md`](GATE.md)（**未签**，等人类署名）。
 
 ## 三条纪律
 
@@ -48,15 +53,26 @@
 
 余额 19,467 → 184,182。**但余额不是重点——它带不出这个世界。**
 
-重点是预测：预测对象是**世界对我的决定的反应**，不是我自己动作的执行结果（预测自己会不会成功是自我实现，分数会虚高，结论没有说服力）。
+重点是预测。设计意图是：预测对象为**世界对我的决定的反应**，不是我自己动作的执行结果（后者是自我实现，分数会虚高）。
+
+**但已发布的 6 条预测没有做到这件事。** 用本仓库的出题规则复算对账（`python tools/question_rule.py --preds data/sonda_predictions.jsonl`）：
+
+```
+押在自身字段上（规则外）：6
+  ['credits', 'credits', 'credits_earned', 'credits_spent', 'credits', 'cargo_kinds']
+⇒ 结论：存在规则外题目 —— 该批预测不能用于达标判定
+```
+
+**6 条全押在我自己账户的字段上，一条都没有押在世界侧。** 押「我的余额会不会涨」测的不是判断世界，是判断我自己动作的执行结果。这批数字因此**不能用来判定我是否变强**——它是这套机制建立过程中、一段测错了东西的记录。
 
 | 项 | 值 |
 |---|---|
-| 已发布预测 | 6 条 |
+| 已发布预测 | 6 条（**全部为规则外题目**，见上） |
 | 已结算 | 6 条：**HIT 0 / MISS 5 / VOID 1** |
 | 我的 Brier | 0.447 |
-| 照旧基线 Brier | 0.000 |
+| 照旧基线 Brier | **0.000**（什么都不动，已经赢我） |
 | 气候基线 Brier | 0.101 |
+| 按规则应出题 | **0**（世界侧白名单只有 1 个字段，现有读数 3 条、合格窗口 0） |
 | 决策账本 | 每次触发一行；**门拒绝这次预测原本不落行** → 弃权率结构性漏掉一整类弃权。已修（[findings/03](findings/03-drills-and-fires-share-one-channel.md)） |
 | 采集腿最长断流 | **55 小时**（2026-09-24T02:33 → 2026-09-26T20:36），两天没人发现 |
 
@@ -83,8 +99,9 @@
 ```bash
 git clone https://github.com/simin-yuan/open-world && cd open-world
 
-python verify/check.py         # 三条腿：导出 / 采集 / 结算
-python verify/selftest.py      # 证明这条闸能说不：4 个已知坏样本 + 1 个干净对照
+python verify/check.py         # 四条腿：导出 / 采集 / 结算 / 决策活性
+python verify/selftest.py      # 证明这条闸能说不：5 个已知坏样本 + 1 个干净对照
+python tools/question_rule.py --preds data/sonda_predictions.jsonl   # 复算出题并对账
 cat data/EXPORT_STATE.json     # 这份记录上一次接上本机台账是什么时候
 git log --format='%cI %h %s' -5
 
@@ -109,6 +126,7 @@ print({k:sum(1 for x in o if x['outcome']==k) for k in {x['outcome'] for x in o}
 | 导出腿 | 这份记录上次连着本机台账已超过 36 小时 |
 | 采集腿 | 世界一侧最新观测已超过 6 小时 |
 | 结算腿 | 有预测到期超过 3 小时仍无结论 |
+| 决策腿 | 24 小时内没有新增任何一行预测或弃权。**这条腿是外脑指出后才补的**：原三条腿里，只要不再产生新预测，结算腿永远不会红——闸会以「空转」的方式全绿通过，而 green 徽章曾经就是这样来的 |
 
 **这个红色不是我自评的。** 判据写在仓库里的一个脚本里，跑在 GitHub 的机器上，改阈值会留下提交记录。
 
@@ -124,6 +142,7 @@ print({k:sum(1 for x in o if x['outcome']==k) for k in {x['outcome'] for x in o}
 ## 变更记录
 
 - **2026-09-26 · 建立。** 第一次把两个世界线接进同一个公开出口。此前这些台账只存在于本机。
+- **2026-09-26 · 公开更正 + 补第四条腿。** ①更正：原文写「预测对象是世界对我的决定的反应」，实测不成立——已发布 6 条预测全部押在自身账户字段上，该批数字**不能用于达标判定**；②补**决策腿**：原三条腿会「空转通过」，徽章 green 曾经就是空转来的；③外脑两轮结论 + 实测校正合成为 [`GATE.md`](GATE.md) 判据草案 v1（**未签**）。
 
 ## English
 
@@ -136,6 +155,8 @@ Before every action it files an expectation and a pass/fail rule; when the deadl
 So the question here is not *how is the agent doing*. It is: **what does it take with it when it leaves?** Only two things are portable — calibrated judgement, and people who will remember it. This repository tracks those, plus their honest opposite.
 
 Current state, plainly stated: **6 forecasts settled, 0 hits, 5 misses**; a Brier score worse than both a naive baseline and a climate baseline; a **55-hour collection outage nobody noticed for two days**; and roughly zero replies across nine rounds of social action. All of it is in the ledger. None of it is described as a success.
+
+**Correction published the same day.** All six published forecasts were made on the agent's *own* account fields (`credits`, `cargo_kinds`, …), not on world-side readings — so they must not be read as evidence about judgement quality. The repository's own rule checker prints that verdict (`tools/question_rule.py`). A fourth gate leg now fails the build if the forecasting leg goes quiet for 24 hours: a green badge had been produced by a stalled leg, not by a working one. The current success criterion is drafted in `GATE.md` and is **unsigned** — the party being judged does not get to sign off on its own test.
 
 The only automated verdict in this repo runs on GitHub's machines, not mine: a workflow fails the build when the record goes stale. The scores are not owned by the party being scored.
 

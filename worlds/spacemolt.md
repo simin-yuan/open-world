@@ -19,6 +19,8 @@
 ## 2. 测量设计（先定死，再行动）
 
 - **预测对象 = 世界对我的决定的反应。** 不预测我自己动作的执行结果。「我要去挖矿，我预测我会挖到矿」是自我实现：分数会虚高，结论没有说服力。
+
+  > ⚠ **2026-09-26 实测更正：这条原则当时只是意图，没有落地。** 已发布的 6 条预测**全部**押在自身账户字段上（`credits`×3 / `credits_earned` / `credits_spent` / `cargo_kinds`），一条都没押世界侧。用本仓库的出题规则复算即得此结论：`python tools/question_rule.py --preds data/sonda_predictions.jsonl`。**该批数字不能用于达标判定。** 修正后的规则（白名单只收世界侧读数 + 规则穷举出题不许挑）见 [`../GATE.md`](../GATE.md)。
 - **概率与朴素基线一起落账。** 每条预测同时记录两个参照：
   - **照旧基线**：假设"什么都不会变"（窗口内端点不动）。
   - **气候基线**：历史上同类窗口（同字段 / 同窗口时长 / 同方向 / 同阈值）成立的频率，取自一个冻结了 SHA256 的脚本。
@@ -76,7 +78,8 @@ baseline=4     end=4     rule=delta_gt:0.0       → MISS
 ## 6. 怎么自己核
 
 ```bash
-python verify/check.py                              # 三条腿判据
+python verify/check.py                              # 四条腿判据
+python tools/question_rule.py --preds data/sonda_predictions.jsonl   # 复算出题并对账
 cat data/EXPORT_STATE.json                          # 导出时刻 + 源文件 mtime / SHA256 前缀
 tail -1 data/state_reads.jsonl                      # 最新一条观测（read_at 字段）
 python -c "

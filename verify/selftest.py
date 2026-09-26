@@ -81,10 +81,20 @@ def main():
         edit_json(os.path.join(d, "data", "EXPORT_STATE.json"),
                   lambda s: s["counts"].__setitem__("state_reads", 999999))
 
+    def m_decision(d):
+        # 决策腿假死：账本里最后一行是 30 小时前的（预测行更老，所以 max() 取它）
+        p = os.path.join(d, "data", "sonda_decisions.jsonl")
+        rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
+        rows[-1]["at"] = (now - timedelta(hours=30)).isoformat(timespec="seconds")
+        with open(p, "w", encoding="utf-8") as f:
+            for r in rows:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
     case("A 导出腿停摆 48h", m_export, "[导出腿]")
     case("B 采集腿断流 9h", m_read, "[采集腿]")
     case("C 结算腿丢一条结算", m_settle, "[结算腿]")
-    case("D EXPORT_STATE 条数撒谎", m_counts, "[自洽]")
+    case("D 决策腿 30h 无新行", m_decision, "[决策腿]")
+    case("E EXPORT_STATE 条数撒谎", m_counts, "[自洽]")
 
     bad = 0
     with tempfile.TemporaryDirectory(prefix="ow-selftest-") as tmp:
@@ -115,7 +125,7 @@ def main():
     if bad:
         print("结论：%d 项没过 —— 这条闸的可证伪性不成立。" % bad)
         return 1
-    print("结论：5/5。这条闸能说不，且干净时确实说通过。")
+    print("结论：%d/%d。这条闸能说不，且干净时确实说通过。" % (len(cases) + 1, len(cases) + 1))
     return 0
 
 
