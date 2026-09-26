@@ -1,5 +1,9 @@
 {
   "counts": {
+    "decisions": 1,
+    "decisions_by_kind": {
+      "abstain": 1
+    },
     "outcomes": 6,
     "outcomes_by_verdict": {
       "MISS": 5,
@@ -13,13 +17,18 @@
     "first": 19467,
     "last": 184182
   },
-  "exported_at": "2026-09-26T22:34:20+08:00",
+  "exported_at": "2026-09-26T22:36:38+08:00",
   "newest": {
     "outcome": "2026-09-22T07:05:59+08:00",
     "prediction": "2026-09-22T01:13:19+08:00",
     "state_read": "2026-09-26T22:10:18+08:00"
   },
   "src_files": {
+    "sonda_decisions.jsonl": {
+      "bytes": 484,
+      "mtime": "2026-09-26T21:24:58+08:00",
+      "sha256_16": "a80f1e74d3b43ae6"
+    },
     "sonda_outcomes.jsonl": {
       "bytes": 2398,
       "mtime": "2026-09-22T07:05:59+08:00",

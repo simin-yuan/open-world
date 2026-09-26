@@ -28,6 +28,9 @@ from datetime import datetime, timedelta, timezone
 CN = timezone(timedelta(hours=8))
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COPY = ["sonda_predictions.jsonl", "sonda_outcomes.jsonl", "state_reads.jsonl"]
+# 可选台账：决策账本（每次决策一行：预测 或 弃权+理由）。缺了不判失败，
+# 但 EXPORT_STATE 里会写 "present": false —— 不让"没有账本"和"0 次弃权"长得一样。
+OPTIONAL = ["sonda_decisions.jsonl"]
 
 
 def jl(path):
@@ -111,21 +114,43 @@ def main():
             "bytes": st.st_size,
         }
 
+    # 可选台账：缺了不算导出失败，但必须在账上写明「没有」——
+    # 否则「0 次弃权」和「弃权账本不存在」会显示成同一个东西。
+    for name in OPTIONAL:
+        s = os.path.join(args.src, name)
+        if os.path.exists(s):
+            shutil.copyfile(s, os.path.join(ddir, name))
+            st = os.stat(s)
+            state["src_files"][name] = {
+                "mtime": datetime.fromtimestamp(st.st_mtime, CN).isoformat(timespec="seconds"),
+                "sha256_16": sha16(s),
+                "bytes": st.st_size,
+            }
+        else:
+            state["src_files"][name] = {"present": False}
+
     preds = jl(os.path.join(ddir, "sonda_predictions.jsonl"))
     outs = jl(os.path.join(ddir, "sonda_outcomes.jsonl"))
     reads = jl(os.path.join(ddir, "state_reads.jsonl"))
+    decs = jl(os.path.join(ddir, "sonda_decisions.jsonl"))
 
     credits = [r.get("credits") for r in reads if r.get("credits") is not None]
     out_counts = {}
     for o in outs:
         k = o.get("outcome", "?")
         out_counts[k] = out_counts.get(k, 0) + 1
+    dec_counts = {}
+    for d in decs:
+        k = d.get("kind", "?")
+        dec_counts[k] = dec_counts.get(k, 0) + 1
 
     state["counts"] = {
         "predictions": len(preds),
         "outcomes": len(outs),
         "outcomes_by_verdict": out_counts,
         "state_reads": len(reads),
+        "decisions": len(decs),
+        "decisions_by_kind": dec_counts,
     }
     state["newest"] = {
         "state_read": reads[-1].get("read_at") if reads else None,

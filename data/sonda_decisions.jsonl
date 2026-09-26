@@ -1,0 +1,1 @@
+{"at": "2026-09-26T21:24:58+08:00", "slot": "evening", "trigger_id": "20260926-evening", "kind": "abstain", "reason": "MODEL_ABSTAIN: 当前状态只有本人账户账本（credits/credits_earned/credits_spent/implied_credits/cargo_kinds），没有任何市场报价、订单簿、任务列表或对手方信息；这些字段全部是自身动作的镜像，预测它们等于预测自己动作的执行结果，按规则不计分。缺少可结算的世界变量，故弃权。"}
