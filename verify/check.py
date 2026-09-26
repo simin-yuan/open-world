@@ -163,6 +163,35 @@ def main():
         else:
             warns.append("[规则] 尚无带规则指纹的决策行 —— 落一次预测/拒绝之后这条才有牙齿")
 
+    # ⑦ 批次完整性：每一批「到期应出的题」都必须每一道都有处置。
+    # 弃权（abstained）是判断结果，漏答（omitted）是漏 —— 两者分开记。
+    # 没有这条，「网格内少报」在账面上是看不见的。
+    batches = [d for d in decs if d.get("kind") == "batch"]
+    if not batches:
+        warns.append("[批次] 还没有批次行——第一轮预测落账后这条才开始有牙齿")
+    else:
+        bad = [b for b in batches if (b.get("missing") or []) or (b.get("omitted") or [])
+               or (b.get("off_rule") or [])]
+        for b in bad:
+            fails.append("[批次] %s 不完整：due=%s answered=%s abstained=%s omitted=%s missing=%s off_rule=%s"
+                         % (b.get("at"), b.get("due_count"), b.get("answered"), b.get("abstained"),
+                            b.get("omitted"), b.get("missing"), b.get("off_rule")))
+        import datetime as _dt
+        try:
+            newest = max(_dt.datetime.fromisoformat(str(b.get("at")).replace("Z", "+00:00"))
+                         for b in batches)
+            b_age_h = (_dt.datetime.now(newest.tzinfo) - newest).total_seconds() / 3600.0
+            last = batches[-1]
+            print("[批次] 共 %d 批，最新 %.1fh 前：due=%s answered=%s abstained=%s"
+                  % (len(batches), b_age_h, last.get("due_count"), last.get("answered"),
+                     last.get("abstained")))
+            if b_age_h > 36:
+                fails.append("[批次] 最新批次行已 %.1fh 前（>36h）—— 决策链又停了" % b_age_h)
+        except Exception as e:
+            warns.append("[批次] 时间戳解析失败：%s" % str(e)[:80])
+        if not bad:
+            print("[批次] 每一批都完整（无漏答、无越界）")
+
     for w in warns:
         print("WARN  %s" % w)
     for f in fails:

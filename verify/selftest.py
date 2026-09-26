@@ -90,6 +90,18 @@ def main():
             for r in rows:
                 f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
+    def m_batch(d):
+        # 有一批「到期 6 道只处置了 5 道」——漏答必须在闸上红
+        import datetime as _dt
+        p = os.path.join(d, "data", "sonda_decisions.jsonl")
+        rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()] if os.path.exists(p) else []
+        rows.append({"at": _dt.datetime.now(_dt.timezone(_dt.timedelta(hours=8))).isoformat(timespec="seconds"), "kind": "batch",
+                     "slot": "morning", "trigger_id": "t-selftest", "due_count": 6, "answered": 5,
+                     "abstained": 0, "refused": 0, "omitted": [],
+                     "missing": ["mkt_silicon_best_buy|3|gt|0"], "off_rule": []})
+        open(p, "w", encoding="utf-8").write(
+            "\n".join(json.dumps(r, ensure_ascii=False) for r in rows))
+
     def m_rule(d):
         # 公开的规则被改过：导出记录里的 sha 对不上了（本地偷偷放宽视界）
         p = os.path.join(d, "data", "question_rule.json")
@@ -103,6 +115,7 @@ def main():
     case("D 决策腿假死 30h", m_decision, "[决策腿]")
     case("E EXPORT_STATE 条数撒谎", m_counts, "[自洽]")
     case("F 公开规则被偷偷改过", m_rule, "[规则]")
+    case("G 批次里有漏答的题", m_batch, "[批次]")
 
     bad = 0
     with tempfile.TemporaryDirectory(prefix="ow-selftest-") as tmp:
