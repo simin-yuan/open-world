@@ -25,6 +25,8 @@ jobs:
           python-version: "3.11"
       - name: 证明这条闸能说不
         run: python verify/selftest.py
+      - name: 证明 gate_stat 的契约与阈值也能说是（不只是恒真拒绝）
+        run: python verify/selftest_gate_stat.py
       - name: check the four legs
         run: python verify/check.py
       - name: summary
