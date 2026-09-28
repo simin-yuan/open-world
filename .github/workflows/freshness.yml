@@ -23,11 +23,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: 证明这条闸能说不
+      # `if: always()` 是刻意的：默认语义下一步失败即终止整个 job，
+      # 于是越靠前的步骤越能把后面的结论挡在日志外面（2026-09-29 实测过一次：
+      # selftest 的对照红，check.py「四条腿到底怎么样」在日志里根本看不到）。
+      # always() 只让后面的步**照跑照打印**，不改判定 —— job 该红的还是红。
+      - name: 证明这条闸能说不，且在干净输入上说得出通过
         run: python verify/selftest.py
       - name: 证明 gate_stat 的契约与阈值也能说是（不只是恒真拒绝）
+        if: always()
         run: python verify/selftest_gate_stat.py
       - name: check the four legs
+        if: always()
         run: python verify/check.py
       - name: summary
         if: always()
@@ -35,6 +41,6 @@ jobs:
           {
             echo "### freshness"
             echo ""
-            echo "跑的是 \`verify/selftest.py\`（4 个已知坏样本 + 1 个干净对照）和 \`verify/check.py\`。"
+            echo "跑的是 \`verify/selftest.py\`（7 个已知坏样本 + 1 个**自造**干净对照，不读 live）和 \`verify/check.py\`。"
             echo "只看仓库里的文件，不问本机。阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
           } >> "$GITHUB_STEP_SUMMARY"

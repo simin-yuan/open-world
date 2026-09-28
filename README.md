@@ -100,7 +100,7 @@
 git clone https://github.com/simin-yuan/open-world && cd open-world
 
 python verify/check.py         # 七条检查：导出 / 采集 / 结算 / 决策活性 / 自洽 / 规则漂移 / 批次完整性
-python verify/selftest.py      # 证明这条闸能说不：7 个已知坏样本 + 1 个干净对照
+python verify/selftest.py      # 证明这条闸能说不：7 个已知坏样本 + 1 个**自造**干净对照（不读 live）
 python tools/question_rule.py --preds data/sonda_predictions.jsonl   # 复算出题并对账
 cat data/EXPORT_STATE.json     # 这份记录上一次接上本机台账是什么时候
 git log --format='%cI %h %s' -5
