@@ -72,6 +72,12 @@ jobs:
       - name: 证明「本地提交 ≠ 远程收到」这条判据能说不（本体见 findings/11）
         if: always()
         run: python verify/selftest_bridge_landed.py
+      - name: 证明「手动 push 那条路」也有闸（拒得下来 / 放得过干净 / 旁路洞被实测出来）
+        if: always()
+        run: python verify/selftest_prepush_hook.py
+      - name: 证明上面这套自证不是装饰（三处变异都要被抓到）
+        if: always()
+        run: python verify/falsify_prepush_hook.py
       - name: check the four legs
         if: always()
         run: python verify/check.py
@@ -86,4 +92,5 @@ jobs:
             echo "隐私闸 verify/leakscan.py --shape-only 只覆盖形状层（词表在本机 _local/，CI 拿不到）：CI 的绿不证明字面词干净 —— 脚本会把「L2 未跑」打进日志，见 findings/09。"
             echo "verify/selftest_export_gate.py 证明这道闸**接在发布路径上**（导出工具出口、fail-closed），不是只跑在 CI 里 —— 见 findings/10。"
             echo "verify/selftest_pushscope_gate.py + verify/falsify_pushscope_gate.py 覆盖**树之外的发布面**（待推提交信息）：push 送走的还有 message，树绿不代表信息干净 —— 见 findings/12。"
+            echo "verify/selftest_prepush_hook.py + verify/falsify_prepush_hook.py 把同一批判据接到**手动 push**那条腿上（.git/hooks/pre-push，fail-closed；--no-verify 旁路在自证里被实测出来，见 findings/15）。"
           } >> "$GITHUB_STEP_SUMMARY"
