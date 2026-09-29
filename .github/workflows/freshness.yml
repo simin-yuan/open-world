@@ -40,6 +40,12 @@ jobs:
       - name: 隐私闸（形状层；字面词层见 findings/09）
         if: always()
         run: python verify/leakscan.py --shape-only
+      # 接线也是判据：闸自己有自证，但「它接在发布路径上」是另一件事 ——
+      # 一个接错位置的闸和没有闸长得一模一样。这一步在干净 clone 上自造词表跑，
+      # 不依赖本机 _local/。红 = 导出会因为闸红而拒绝产出（09:20/21:20 那条桥会停）。
+      - name: 证明发布前隐私闸真的接在发布路径上（不是只跑在 CI 里）
+        if: always()
+        run: python verify/selftest_export_gate.py
       - name: check the four legs
         if: always()
         run: python verify/check.py
@@ -52,4 +58,5 @@ jobs:
             echo "跑的是 \`verify/selftest.py\`（7 个已知坏样本 + 1 个**自造**干净对照，不读 live）和 \`verify/check.py\`。"
             echo "只看仓库里的文件，不问本机。阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
             echo "隐私闸 verify/leakscan.py --shape-only 只覆盖形状层（词表在本机 _local/，CI 拿不到）：CI 的绿不证明字面词干净 —— 脚本会把「L2 未跑」打进日志，见 findings/09。"
+            echo "verify/selftest_export_gate.py 证明这道闸**接在发布路径上**（导出工具出口、fail-closed），不是只跑在 CI 里 —— 见 findings/10。"
           } >> "$GITHUB_STEP_SUMMARY"

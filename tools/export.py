@@ -91,6 +91,25 @@ def render_settlements(preds, outs):
     return head + "\n" + body + "\n\n合计：" + summary + "\n"
 
 
+def privacy_gate():
+    """发布前隐私闸：**在进程内**调 verify/leakscan.py 的 scan()。
+
+    为什么不用子进程：cron 环境**没有 PATH**（见 MEMORY「cron 运行环境」）。进程内调用
+    连 `sys.executable` 都不需要，少一个能静默失效的环节。
+
+    扫的是 `REPO` 整棵树（= 紧接着要被 `git add -A` 提交、push 的那份内容），
+    不是某几个文件 —— 口径必须与「将被发布的东西」重合。
+    返回 leakscan 的退出码：PASS=0 / FAIL=1 / UNDECIDABLE=2 / ERROR=3。
+    **非 0 一律当拦下**：`2`（词表读不到 = 没查）不许被当成「干净」。
+    """
+    sys.path.insert(0, os.path.join(REPO, "verify"))
+    import leakscan
+    rc, lines = leakscan.scan(REPO)
+    for ln in lines:
+        print("  [gate] " + ln)
+    return rc
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True, help="本机台账目录（含 sonda_*.jsonl / state_reads.jsonl）")
@@ -219,6 +238,17 @@ def main():
     ]
     with open(os.path.join(REPO, "SETTLEMENTS.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(md))
+
+    # ③ 发布前隐私闸（fail-closed）。
+    # 位置是刻意的：本文件是发布路径上**最后一步 repo 侧代码**，紧接着 cron job 就
+    # `git add -A` → commit → push。闸只跑在 GitHub CI 里时，顺序是「先发布、后检查」——
+    # 一次漏就是永久可检索，那道绿拦不住任何东西。跑在这里，红 → rc≠0 → job 走 fail()
+    # → 不提交、不推送、推飞书。**宁可桥停一天，不可发一次泄漏**（停是可逆的，发布不是）。
+    grc = privacy_gate()
+    if grc != 0:
+        print("EXPORT_REFUSED: 隐私闸 rc=%d —— 拒绝产出（不提交、不推送）。"
+              "闸的判据在 verify/leakscan.py，边界见其头部与 findings/09、findings/10。" % grc)
+        return 1
 
     if not args.quiet:
         print("exported_at=%s" % state["exported_at"])
