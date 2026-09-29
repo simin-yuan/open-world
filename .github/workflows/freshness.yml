@@ -32,6 +32,14 @@ jobs:
       - name: 证明 gate_stat 的契约与阈值也能说是（不只是恒真拒绝）
         if: always()
         run: python verify/selftest_gate_stat.py
+      - name: 证明隐私闸能说不（S1/S2/S3/字面词各自的坏样本、缺词表、豁免两半都要按预期红/绿）
+        if: always()
+        run: python verify/selftest_leakscan.py
+      # 只跑形状层：字面词层要本机词表 _local/privterms.txt，CI 的干净 clone 上没有。
+      # 绿不代表字面层干净 —— 脚本自己会把「L2 未跑」打进日志，别把这一行当全套结论。
+      - name: 隐私闸（形状层；字面词层见 findings/09）
+        if: always()
+        run: python verify/leakscan.py --shape-only
       - name: check the four legs
         if: always()
         run: python verify/check.py
@@ -43,4 +51,5 @@ jobs:
             echo ""
             echo "跑的是 \`verify/selftest.py\`（7 个已知坏样本 + 1 个**自造**干净对照，不读 live）和 \`verify/check.py\`。"
             echo "只看仓库里的文件，不问本机。阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
+            echo "隐私闸 verify/leakscan.py --shape-only 只覆盖形状层（词表在本机 _local/，CI 拿不到）：CI 的绿不证明字面词干净 —— 脚本会把「L2 未跑」打进日志，见 findings/09。"
           } >> "$GITHUB_STEP_SUMMARY"
