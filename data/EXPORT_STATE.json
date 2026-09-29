@@ -11,18 +11,18 @@
       "VOID": 1
     },
     "predictions": 6,
-    "state_reads": 316
+    "state_reads": 339
   },
   "credits": {
-    "distinct": 33,
+    "distinct": 36,
     "first": 19467,
-    "last": 334587
+    "last": 362587
   },
-  "exported_at": "2026-09-28T21:20:14+08:00",
+  "exported_at": "2026-09-29T09:20:21+08:00",
   "newest": {
     "outcome": "2026-09-22T07:05:59+08:00",
     "prediction": "2026-09-22T01:13:19+08:00",
-    "state_read": "2026-09-28T21:10:16+08:00"
+    "state_read": "2026-09-29T09:10:23+08:00"
   },
   "rule": {
     "directions": [
@@ -60,9 +60,9 @@
       "sha256_16": "9850363f59dd44a7"
     },
     "state_reads.jsonl": {
-      "bytes": 106365,
-      "mtime": "2026-09-28T21:10:18+08:00",
-      "sha256_16": "67db7770c7a49033"
+      "bytes": 116346,
+      "mtime": "2026-09-29T09:10:26+08:00",
+      "sha256_16": "dce609d67f87d7db"
     }
   }
 }
