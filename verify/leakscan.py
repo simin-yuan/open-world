@@ -84,6 +84,20 @@ def norm(s):
     return re.sub(r"[\\/]+", "/", s or "").strip().lower()
 
 
+def _rel(p, root):
+    """输出里只留相对路径 / 末段。本闸的 stdout 是**发布面**（findings/12）：
+    tools/export.py 会把它折进下一条提交信息，所以它自己不许带机器绝对路径。"""
+    if not p:
+        return "(默认)"
+    try:
+        r = os.path.relpath(p, root)
+        if not r.startswith(".."):
+            return r
+    except ValueError:
+        pass
+    return os.path.basename(p)
+
+
 def load_terms(path):
     """→ (terms, status)。status: RAN（读到词表，哪怕是空的）/ MISSING（读不到）。"""
     if not path or not os.path.isfile(path):
@@ -157,9 +171,10 @@ def scan(root, terms_path=None, terms_required=True, allow=None, explain=False):
     sh = [h for h in hits if h[1] in SHAPE_RULES]
     lt = [h for h in hits if h[1] == TERM_RULE]
 
-    lines = ["leakscan root=%s" % root]
+    lines = ["leakscan root=…%s（只印末段：绝对路径不进输出，理由见 findings/12）"
+             % os.path.basename(root)]
     if tstat == "RAN":
-        lines.append("  词表 %s（%d 词）" % (terms_path, len(terms)))
+        lines.append("  词表 %s（%d 词）" % (_rel(terms_path, root), len(terms)))
     if explain:
         for rel, rule, sample, reason in allowed:
             lines.append("  allow  %s: %s -> %r  （%s）" % (rel, rule, sample[:60], reason))
@@ -171,7 +186,8 @@ def scan(root, terms_path=None, terms_required=True, allow=None, explain=False):
     if tstat == "SKIPPED":
         lines.append("L2 字面层  **未跑**（--shape-only）：本次运行的绿**不证明**字面词那一半")
     elif tstat == "MISSING":
-        lines.append("L2 字面层  词表读不到（%s）→ UNDECIDABLE，不猜成 PASS" % terms_path)
+        lines.append("L2 字面层  词表读不到（%s）→ UNDECIDABLE，不猜成 PASS"
+                     % _rel(terms_path, root))
     else:
         lines.append("L2 字面层  terms=%d hits=%d  %s" % (
             len(terms), len(lt), "FAIL" if lt else "PASS"))

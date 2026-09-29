@@ -46,6 +46,18 @@ jobs:
       - name: 证明发布前隐私闸真的接在发布路径上（不是只跑在 CI 里）
         if: always()
         run: python verify/selftest_export_gate.py
+      # 树之外的**第二个发布面**：一次 `git push` 还送走 `<upstream>..HEAD` 每条提交的 message。
+      # 树绿 ≠ 信息干净（findings/12 的实测：树上 LEAKS=0，提交标题里带着本机绝对路径）。
+      # 自造本地裸仓当远程，不联网、不读 live 仓；词表层在干净 clone 上是 UNDECIDABLE，
+      # 脚本会把「词表读不到」打进日志 —— 这一行的绿不证明字面词那一半。
+      - name: 证明「待推提交信息」这道闸能说不（两类样本 + 三种非通过状态）
+        if: always()
+        run: python verify/selftest_pushscope_gate.py
+      # 变异测试：把闸复制进临时目录、注入三处失能变异，它自己的自证必须跟着红。
+      # 只数 rc 不够 —— 脚本按**用例名**核对红在对的那一道上，模块崩了不算抓到。
+      - name: 证明上面这道闸的自证不是装饰（三次变异都要被抓到）
+        if: always()
+        run: python verify/falsify_pushscope_gate.py
       # 本体 verify/bridge_landed.py 不进 CI：干净 clone 里「本地 HEAD == 远程」是重言的，
       # 一个永远绿的检查就是装饰。这里只跑它的自证（本地裸仓自造四态，不联网）。
       - name: 证明「本地提交 ≠ 远程收到」这条判据能说不（本体见 findings/11）
@@ -64,4 +76,5 @@ jobs:
             echo "只看仓库里的文件，不问本机。阈值与理由写在脚本头部 —— 改阈值等于改判据，会留下提交记录。"
             echo "隐私闸 verify/leakscan.py --shape-only 只覆盖形状层（词表在本机 _local/，CI 拿不到）：CI 的绿不证明字面词干净 —— 脚本会把「L2 未跑」打进日志，见 findings/09。"
             echo "verify/selftest_export_gate.py 证明这道闸**接在发布路径上**（导出工具出口、fail-closed），不是只跑在 CI 里 —— 见 findings/10。"
+            echo "verify/selftest_pushscope_gate.py + verify/falsify_pushscope_gate.py 覆盖**树之外的发布面**（待推提交信息）：push 送走的还有 message，树绿不代表信息干净 —— 见 findings/12。"
           } >> "$GITHUB_STEP_SUMMARY"

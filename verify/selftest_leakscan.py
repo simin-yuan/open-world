@@ -108,8 +108,34 @@ expect("I shape-only 不证明字面层", 0,
        files={"docs/x.md": TERM_SAMPLE}, shape_only=True, allow={})
 
 
+def no_abs_root_in_output():
+    """把「这道闸的输出里不许出现机器绝对路径」变成可失败的检查（findings/12）。
+
+    为什么要有它：本闸的 stdout 是**发布面** —— tools/export.py 把它折进下一条提交信息
+    （实测：提交 0295d99 的标题就是 `[gate] leakscan root=E:\\...`，而那正是 T10 自己引入的）。
+    一个把绝对路径当摘要行打出去的闸，自己就是泄漏源。这条判据能红：把 `_rel` 换回裸路径即可。
+    """
+    with tempfile.TemporaryDirectory(prefix="ow-leakscan-absroot-") as d:
+        with open(os.path.join(d, "README.md"), "w", encoding="utf-8") as fh:
+            fh.write(CLEAN)
+        tp = write_terms(d, ("zzpriv",))
+        _rc, lines = LS.scan(d, terms_path=tp)
+        blob = "\n".join(lines)
+        leaked = [s for s in (d, d.replace("\\", "/"), tp, tp.replace("\\", "/"))
+                  if s in blob]
+        if leaked:
+            print("  [MISS] 闸的输出里出现了机器绝对路径 —— 它就是 findings/12 那个泄漏源")
+            return False
+        if os.path.basename(d) not in blob:
+            print("  [MISS] 闸的输出里连末段都没有：判据退化成「什么都不说」")
+            return False
+    print("  [PASS] 闸的输出不含绝对根路径/词表绝对路径（只印末段与相对路径）")
+    return True
+
+
 def main():
     fails = []
+    extra = [no_abs_root_in_output()]
     with tempfile.TemporaryDirectory(prefix="ow-leakscan-") as root:
         for i, (name, want_rc, subs, absent, kw) in enumerate(CASES):
             d = os.path.join(root, "c%d" % i)
@@ -127,9 +153,10 @@ def main():
                 print("      | " + ln)
             if not ok:
                 fails.append(name)
+    bad = len(fails) + (0 if extra[0] else 1)
     print("\nSELFTEST %s  cases=%d failed=%d" % (
-        "OK" if not fails else "FAILED", len(CASES), len(fails)))
-    return 0 if not fails else 1
+        "OK" if not bad else "FAILED", len(CASES) + 1, bad))
+    return 0 if not bad else 1
 
 
 if __name__ == "__main__":

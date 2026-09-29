@@ -92,22 +92,33 @@ def render_settlements(preds, outs):
 
 
 def privacy_gate():
-    """发布前隐私闸：**在进程内**调 verify/leakscan.py 的 scan()。
+    """发布前隐私闸：**在进程内**调 verify 下的两道闸（cron 没有 PATH，不用子进程）。
 
-    为什么不用子进程：cron 环境**没有 PATH**（见 MEMORY「cron 运行环境」）。进程内调用
-    连 `sys.executable` 都不需要，少一个能静默失效的环节。
+    发布面是**两样东西**，缺一样就是漏（findings/12）：
+      ① 树       —— `git add -A` 提交、push 的文件内容    → verify/leakscan.py
+      ② 提交信息  —— `<upstream>..HEAD` 每条提交的 message → verify/pushscope_gate.py
+    实测过「树干净、信息里带机器绝对路径」（提交 0295d99）：只查 ① 的闸全程绿，
+    一次 push 就把它写进 GitHub 的永久历史。
 
-    扫的是 `REPO` 整棵树（= 紧接着要被 `git add -A` 提交、push 的那份内容），
-    不是某几个文件 —— 口径必须与「将被发布的东西」重合。
-    返回 leakscan 的退出码：PASS=0 / FAIL=1 / UNDECIDABLE=2 / ERROR=3。
-    **非 0 一律当拦下**：`2`（词表读不到 = 没查）不许被当成「干净」。
+    **本函数的 stdout 也是发布面**：导出 job 取本工具 stdout 的**第一行**拼成提交标题
+    （`msg = 'data: 自动导出 %s' % stdout.splitlines()[0]`，job 源码已核）。
+    所以这里打的每一行都必须能直接公开 —— T10 就是这么翻的车。
+
+    返回 0 只在**两道闸都给出 0** 时；任一非 0 一律当拦下 —— `2`（词表读不到 /
+    取不到上游 = 没查）不许被当成「干净」。FAIL(1) 优先于 UNDECIDABLE(2)。
     """
     sys.path.insert(0, os.path.join(REPO, "verify"))
     import leakscan
-    rc, lines = leakscan.scan(REPO)
-    for ln in lines:
+    import pushscope_gate
+    tre, tlines = leakscan.scan(REPO)
+    for ln in tlines:
         print("  [gate] " + ln)
-    return rc
+    mrc, mlines = pushscope_gate.scan_messages(REPO)
+    for ln in mlines:
+        print("  [gate] " + ln)
+    if tre == 1 or mrc == 1:
+        return 1
+    return tre if tre != 0 else mrc
 
 
 def main():
@@ -244,14 +255,20 @@ def main():
     # `git add -A` → commit → push。闸只跑在 GitHub CI 里时，顺序是「先发布、后检查」——
     # 一次漏就是永久可检索，那道绿拦不住任何东西。跑在这里，红 → rc≠0 → job 走 fail()
     # → 不提交、不推送、推飞书。**宁可桥停一天，不可发一次泄漏**（停是可逆的，发布不是）。
+    #
+    # **顺序也是判据**：job 取本工具 stdout 的第一行当提交标题（源码已核）。所以摘要行
+    # 必须先打、闸的结论在后面 —— T10 把闸打在最前面，它的首行（含机器绝对路径）就被
+    # 折进了提交 0295d99 的标题（findings/12）。树闸只扫树，看不见这一面。
+    if not args.quiet:
+        print("exported_at=%s" % state["exported_at"])
     grc = privacy_gate()
     if grc != 0:
         print("EXPORT_REFUSED: 隐私闸 rc=%d —— 拒绝产出（不提交、不推送）。"
-              "闸的判据在 verify/leakscan.py，边界见其头部与 findings/09、findings/10。" % grc)
+              "判据在 verify/leakscan.py（树）与 verify/pushscope_gate.py（待推提交信息），"
+              "边界见各自头部与 findings/09、10、12。" % grc)
         return 1
 
     if not args.quiet:
-        print("exported_at=%s" % state["exported_at"])
         print("counts=%s" % json.dumps(state["counts"], ensure_ascii=False))
         print("newest=%s" % json.dumps(state["newest"], ensure_ascii=False))
     return 0
