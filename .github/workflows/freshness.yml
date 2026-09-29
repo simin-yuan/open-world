@@ -58,6 +58,15 @@ jobs:
       - name: 证明上面这道闸的自证不是装饰（三次变异都要被抓到）
         if: always()
         run: python verify/falsify_pushscope_gate.py
+      # 树之外的**第三个发布面**：同范围内每个 blob —— 一个文件在中间提交里带过敏感串、
+      # 后面又被改干净时，前两道闸都绿，而那一版 blob 仍随这次 push 出去（findings/13）。
+      # 自造本地裸仓当远程，核心用例是「树闸在同一夹具上必须绿、本闸必须红」。
+      - name: 证明「待推范围对象内容」这道闸能说不（含与树闸的分野用例）
+        if: always()
+        run: python verify/selftest_history_gate.py
+      - name: 证明上面这道闸的自证不是装饰（三次变异都要被抓到）
+        if: always()
+        run: python verify/falsify_history_gate.py
       # 本体 verify/bridge_landed.py 不进 CI：干净 clone 里「本地 HEAD == 远程」是重言的，
       # 一个永远绿的检查就是装饰。这里只跑它的自证（本地裸仓自造四态，不联网）。
       - name: 证明「本地提交 ≠ 远程收到」这条判据能说不（本体见 findings/11）

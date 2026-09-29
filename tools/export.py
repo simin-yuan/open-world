@@ -94,31 +94,38 @@ def render_settlements(preds, outs):
 def privacy_gate():
     """发布前隐私闸：**在进程内**调 verify 下的两道闸（cron 没有 PATH，不用子进程）。
 
-    发布面是**两样东西**，缺一样就是漏（findings/12）：
+    发布面是**三样东西**，缺一样就是漏（findings/12、13）：
       ① 树       —— `git add -A` 提交、push 的文件内容    → verify/leakscan.py
       ② 提交信息  —— `<upstream>..HEAD` 每条提交的 message → verify/pushscope_gate.py
-    实测过「树干净、信息里带机器绝对路径」（提交 0295d99）：只查 ① 的闸全程绿，
-    一次 push 就把它写进 GitHub 的永久历史。
+      ③ 对象内容  —— 同范围内每个 blob（含**中间提交**里的旧版本）→ verify/history_gate.py
+    实测过①：「树干净、信息里带机器绝对路径」（提交 0295d99）—— 只查 ① 的闸全程绿。
+    实测过③：「一个文件在中间提交里带过敏感串、随后又被改干净」—— 只查 ①②的闸全程绿，
+    而那一版 blob 仍会随这次 push 出去（本仓实测 3 个 blob / 8 处命中，全落在「只在中间
+    提交里存在」的那 14 个 blob 中）。一次 push 就把它们写进 GitHub 的永久历史。
 
     **本函数的 stdout 也是发布面**：导出 job 取本工具 stdout 的**第一行**拼成提交标题
     （`msg = 'data: 自动导出 %s' % stdout.splitlines()[0]`，job 源码已核）。
     所以这里打的每一行都必须能直接公开 —— T10 就是这么翻的车。
 
-    返回 0 只在**两道闸都给出 0** 时；任一非 0 一律当拦下 —— `2`（词表读不到 /
+    返回 0 只在**三道闸都给出 0** 时；任一非 0 一律当拦下 —— `2`（词表读不到 /
     取不到上游 = 没查）不许被当成「干净」。FAIL(1) 优先于 UNDECIDABLE(2)。
     """
     sys.path.insert(0, os.path.join(REPO, "verify"))
     import leakscan
     import pushscope_gate
+    import history_gate
     tre, tlines = leakscan.scan(REPO)
     for ln in tlines:
         print("  [gate] " + ln)
     mrc, mlines = pushscope_gate.scan_messages(REPO)
     for ln in mlines:
         print("  [gate] " + ln)
-    if tre == 1 or mrc == 1:
+    hrc, hlines = history_gate.scan_history(REPO)
+    for ln in hlines:
+        print("  [gate] " + ln)
+    if tre == 1 or mrc == 1 or hrc == 1:
         return 1
-    return tre if tre != 0 else mrc
+    return tre if tre != 0 else (mrc if mrc != 0 else hrc)
 
 
 def main():
@@ -264,8 +271,9 @@ def main():
     grc = privacy_gate()
     if grc != 0:
         print("EXPORT_REFUSED: 隐私闸 rc=%d —— 拒绝产出（不提交、不推送）。"
-              "判据在 verify/leakscan.py（树）与 verify/pushscope_gate.py（待推提交信息），"
-              "边界见各自头部与 findings/09、10、12。" % grc)
+              "判据在 verify/leakscan.py（树）、verify/pushscope_gate.py（待推提交信息）"
+              "与 verify/history_gate.py（待推范围内的对象内容），"
+              "边界见各自头部与 findings/09、10、12、13。" % grc)
         return 1
 
     if not args.quiet:
