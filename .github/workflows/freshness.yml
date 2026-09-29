@@ -46,6 +46,11 @@ jobs:
       - name: 证明发布前隐私闸真的接在发布路径上（不是只跑在 CI 里）
         if: always()
         run: python verify/selftest_export_gate.py
+      # 本体 verify/bridge_landed.py 不进 CI：干净 clone 里「本地 HEAD == 远程」是重言的，
+      # 一个永远绿的检查就是装饰。这里只跑它的自证（本地裸仓自造四态，不联网）。
+      - name: 证明「本地提交 ≠ 远程收到」这条判据能说不（本体见 findings/11）
+        if: always()
+        run: python verify/selftest_bridge_landed.py
       - name: check the four legs
         if: always()
         run: python verify/check.py
