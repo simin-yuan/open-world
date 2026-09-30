@@ -1,30 +1,30 @@
 {
   "counts": {
-    "decisions": 16,
+    "decisions": 30,
     "decisions_by_kind": {
-      "abstain": 8,
-      "batch": 2,
-      "predict": 6
+      "abstain": 14,
+      "batch": 4,
+      "predict": 12
     },
-    "outcomes": 10,
+    "outcomes": 16,
     "outcomes_by_verdict": {
-      "HIT": 2,
-      "MISS": 7,
+      "HIT": 5,
+      "MISS": 10,
       "VOID": 1
     },
-    "predictions": 12,
-    "state_reads": 387
+    "predictions": 18,
+    "state_reads": 411
   },
   "credits": {
-    "distinct": 36,
+    "distinct": 39,
     "first": 19467,
-    "last": 362587
+    "last": 437099
   },
-  "exported_at": "2026-09-30T09:20:43+08:00",
+  "exported_at": "2026-09-30T21:20:42+08:00",
   "newest": {
-    "outcome": "2026-09-30T04:05:43+08:00",
-    "prediction": "2026-09-29T21:27:02+08:00",
-    "state_read": "2026-09-30T09:10:46+08:00"
+    "outcome": "2026-09-30T20:05:42+08:00",
+    "prediction": "2026-09-30T13:06:00+08:00",
+    "state_read": "2026-09-30T21:10:46+08:00"
   },
   "rule": {
     "directions": [
@@ -47,24 +47,24 @@
   },
   "src_files": {
     "sonda_decisions.jsonl": {
-      "bytes": 5835,
-      "mtime": "2026-09-29T21:27:02+08:00",
-      "sha256_16": "e1144b92bd153c52"
+      "bytes": 10657,
+      "mtime": "2026-09-30T20:05:58+08:00",
+      "sha256_16": "71a93c1e7a8b28b7"
     },
     "sonda_outcomes.jsonl": {
-      "bytes": 4224,
-      "mtime": "2026-09-30T04:05:43+08:00",
-      "sha256_16": "0f0899d58e27ec81"
+      "bytes": 6964,
+      "mtime": "2026-09-30T20:05:42+08:00",
+      "sha256_16": "158636d26ff3c51a"
     },
     "sonda_predictions.jsonl": {
-      "bytes": 7435,
-      "mtime": "2026-09-29T21:27:02+08:00",
-      "sha256_16": "81ee06f9705c9730"
+      "bytes": 11322,
+      "mtime": "2026-09-30T13:06:00+08:00",
+      "sha256_16": "b65e702b98ad8bb9"
     },
     "state_reads.jsonl": {
-      "bytes": 137027,
-      "mtime": "2026-09-30T09:10:48+08:00",
-      "sha256_16": "262ca901926d4640"
+      "bytes": 147260,
+      "mtime": "2026-09-30T21:10:49+08:00",
+      "sha256_16": "3f6eaf00524b37aa"
     }
   }
 }
