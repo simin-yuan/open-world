@@ -1,30 +1,30 @@
 {
   "counts": {
-    "decisions": 32,
+    "decisions": 41,
     "decisions_by_kind": {
-      "abstain": 16,
-      "batch": 4,
-      "predict": 12
+      "abstain": 17,
+      "batch": 6,
+      "predict": 18
     },
-    "outcomes": 18,
+    "outcomes": 22,
     "outcomes_by_verdict": {
-      "HIT": 5,
-      "MISS": 10,
+      "HIT": 7,
+      "MISS": 12,
       "VOID": 3
     },
-    "predictions": 18,
-    "state_reads": 480
+    "predictions": 24,
+    "state_reads": 504
   },
   "credits": {
-    "distinct": 55,
+    "distinct": 63,
     "first": 19467,
-    "last": 858056
+    "last": 1004259
   },
-  "exported_at": "2026-10-02T09:20:29+08:00",
+  "exported_at": "2026-10-02T21:20:07+08:00",
   "newest": {
-    "outcome": "2026-10-01T02:05:45+08:00",
-    "prediction": "2026-09-30T13:06:00+08:00",
-    "state_read": "2026-10-02T09:10:31+08:00"
+    "outcome": "2026-10-02T20:05:28+08:00",
+    "prediction": "2026-10-02T13:05:40+08:00",
+    "state_read": "2026-10-02T21:10:09+08:00"
   },
   "rule": {
     "directions": [
@@ -47,24 +47,24 @@
   },
   "src_files": {
     "sonda_decisions.jsonl": {
-      "bytes": 11153,
-      "mtime": "2026-10-01T20:05:44+08:00",
-      "sha256_16": "1e317dbcbe3a71d1"
+      "bytes": 14483,
+      "mtime": "2026-10-02T20:05:52+08:00",
+      "sha256_16": "85e113f178d6653c"
     },
     "sonda_outcomes.jsonl": {
-      "bytes": 7865,
-      "mtime": "2026-10-01T02:05:45+08:00",
-      "sha256_16": "2b88dbc350b31310"
+      "bytes": 9693,
+      "mtime": "2026-10-02T20:05:28+08:00",
+      "sha256_16": "9f6ff1dfbbdd217e"
     },
     "sonda_predictions.jsonl": {
-      "bytes": 11322,
-      "mtime": "2026-09-30T13:06:00+08:00",
-      "sha256_16": "b65e702b98ad8bb9"
+      "bytes": 15210,
+      "mtime": "2026-10-02T13:05:41+08:00",
+      "sha256_16": "ed778ed1ab358e00"
     },
     "state_reads.jsonl": {
-      "bytes": 175021,
-      "mtime": "2026-10-02T09:10:33+08:00",
-      "sha256_16": "37ab9fd31ea6557d"
+      "bytes": 185356,
+      "mtime": "2026-10-02T21:10:11+08:00",
+      "sha256_16": "36f3543f74805a80"
     }
   }
 }
