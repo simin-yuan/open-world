@@ -6,25 +6,25 @@
       "batch": 6,
       "predict": 18
     },
-    "outcomes": 22,
+    "outcomes": 24,
     "outcomes_by_verdict": {
-      "HIT": 7,
-      "MISS": 12,
+      "HIT": 8,
+      "MISS": 13,
       "VOID": 3
     },
     "predictions": 24,
-    "state_reads": 504
+    "state_reads": 528
   },
   "credits": {
-    "distinct": 63,
+    "distinct": 64,
     "first": 19467,
-    "last": 1004259
+    "last": 1003615
   },
-  "exported_at": "2026-10-02T21:20:07+08:00",
+  "exported_at": "2026-10-03T09:20:05+08:00",
   "newest": {
-    "outcome": "2026-10-02T20:05:28+08:00",
+    "outcome": "2026-10-03T02:05:07+08:00",
     "prediction": "2026-10-02T13:05:40+08:00",
-    "state_read": "2026-10-02T21:10:09+08:00"
+    "state_read": "2026-10-03T09:10:08+08:00"
   },
   "rule": {
     "directions": [
@@ -52,9 +52,9 @@
       "sha256_16": "85e113f178d6653c"
     },
     "sonda_outcomes.jsonl": {
-      "bytes": 9693,
-      "mtime": "2026-10-02T20:05:28+08:00",
-      "sha256_16": "9f6ff1dfbbdd217e"
+      "bytes": 10608,
+      "mtime": "2026-10-03T02:05:07+08:00",
+      "sha256_16": "082ac56c4ffd0ba0"
     },
     "sonda_predictions.jsonl": {
       "bytes": 15210,
@@ -62,9 +62,9 @@
       "sha256_16": "ed778ed1ab358e00"
     },
     "state_reads.jsonl": {
-      "bytes": 185356,
-      "mtime": "2026-10-02T21:10:11+08:00",
-      "sha256_16": "36f3543f74805a80"
+      "bytes": 195802,
+      "mtime": "2026-10-03T09:10:10+08:00",
+      "sha256_16": "8fd8fd60eaefd546"
     }
   }
 }
